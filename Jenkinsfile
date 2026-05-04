@@ -16,15 +16,15 @@ pipeline{
         stage("Build Docker Image"){
             steps {
                 echo 'Building Docker image...'
-                sh "docker build -t ${IMAGE_NAME} ."
+                sh "sudo docker build -t ${IMAGE_NAME} ."
             }
         }
         stage("Stop and remove previous container"){
             steps {
                 sh """
                 echo 'Stopping and removing previous container...'
-                docker stop ${CONTAINER_NAME} || true
-                docker rm ${CONTAINER_NAME} || true
+                sudo docker stop ${CONTAINER_NAME} || true
+                sudo docker rm ${CONTAINER_NAME} || true
                 """
             }
         }
@@ -32,7 +32,7 @@ pipeline{
             steps {
                 sh """
                 echo 'Running Docker container...'
-                docker run -d --name ${CONTAINER_NAME} -p ${PORT}:${PORT} ${IMAGE_NAME}
+                sudo docker run -d --name ${CONTAINER_NAME} -p ${PORT}:${PORT} ${IMAGE_NAME}
                 """
             }
         }
