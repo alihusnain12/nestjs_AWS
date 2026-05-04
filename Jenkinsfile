@@ -1,4 +1,4 @@
-pipeline{
+pipeline {
     agent any
     environment {
         CONTAINER_NAME = 'nest-app'
@@ -13,37 +13,46 @@ pipeline{
                 git branch: 'main', url: 'https://github.com/alihusnain12/nestjs_AWS.git'
             }
         }
-        stage("Build Docker Image"){
+        stage("Build Docker Image") {
             steps {
                 echo 'Building Docker image...'
-                sh "sudo docker build -t ${IMAGE_NAME} ."
+                sh "docker build -t ${IMAGE_NAME} ."  // ✅ No sudo
             }
         }
-        stage("Stop and remove previous container"){
+        stage("Stop and Remove Previous Container") {
             steps {
                 sh """
                 echo 'Stopping and removing previous container...'
-                sudo docker stop ${CONTAINER_NAME} || true
-                sudo docker rm ${CONTAINER_NAME} || true
+                docker stop ${CONTAINER_NAME} || true   // ✅ No sudo
+                docker rm ${CONTAINER_NAME} || true     // ✅ No sudo
                 """
             }
         }
-        stage("Run Docker Container"){
+        stage("Run Docker Container") {
             steps {
                 sh """
                 echo 'Running Docker container...'
-                sudo docker run -d --name ${CONTAINER_NAME} -p ${PORT}:${PORT} ${IMAGE_NAME}
+                docker run -d --name ${CONTAINER_NAME} -p ${PORT}:${PORT} ${IMAGE_NAME}  // ✅ No sudo
                 """
             }
         }
-        stage("Send email notification"){
+        stage("Send Email Notification") {
             steps {
-               emailtext(
-                subject: "Deployment Successful",
-                body: "Deployment successful! Application is running on port ${PORT}",
-                to: "${EMAIL}"
-               )
+                emailext(        // ✅ Fixed typo: emailtext → emailext
+                    subject: "Deployment Successful",
+                    body: "Deployment successful! Application is running on port ${PORT}",
+                    to: "${EMAIL}"
+                )
             }
+        }
+    }
+    post {                       // ✅ Better than a stage for notifications
+        failure {
+            emailext(
+                subject: "Deployment FAILED",
+                body: "Pipeline failed. Check Jenkins logs for details.",
+                to: "${EMAIL}"
+            )
         }
     }
 }
