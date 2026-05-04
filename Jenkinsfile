@@ -10,7 +10,7 @@ pipeline{
         stage('Clone Repository') {
             steps {
                 echo 'Cloning repository...'
-                git branch: 'main', url: 'git@github.com:alihusnain12/nestjs_AWS.git'
+                git branch: 'main', url: 'https://github.com/alihusnain12/nestjs_AWS.git'
             }
         }
         stage("Build Docker Image"){
